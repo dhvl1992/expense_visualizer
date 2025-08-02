@@ -509,7 +509,7 @@ Date	Source	Amount (Rs.)
                     <h3 class="chart-title">📅 Monthly Financial Trend</h3>
                     <div style="margin-bottom: 15px;">
                         <label for="monthSelect" style="margin-right: 10px; font-weight: 600;">Select Month:</label>
-                        <select id="monthSelect" onchange="window.updateTrendChart()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ddd;">
+                        <select id="monthSelect" onchange="updateTrendChart()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ddd;">
                             <option value="all">All Months</option>
                         </select>
                     </div>
@@ -539,6 +539,95 @@ Date	Source	Amount (Rs.)
         let expenseData = [];
         let incomeData = [];
         let currentJsonTab = 'expense';
+
+        // Global trend chart functions - defined at the top level
+        function createTrendChart(selectedMonth) {
+            if (charts.trend) {
+                charts.trend.destroy();
+            }
+
+            const monthlyData = window.globalMonthlyData;
+            const sortedMonths = window.globalSortedMonths;
+
+            if (!monthlyData || !sortedMonths) return;
+
+            let displayMonths = sortedMonths;
+            let chartTitle = 'Monthly Financial Trend';
+
+            if (selectedMonth !== 'all') {
+                displayMonths = [selectedMonth];
+                const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long' 
+                });
+                chartTitle = `Financial Data for ${monthName}`;
+            }
+
+            charts.trend = new Chart(document.getElementById('trendChart'), {
+                type: selectedMonth === 'all' ? 'line' : 'bar',
+                data: {
+                    labels: selectedMonth === 'all' ? displayMonths : ['Income', 'Expenses', 'Net Savings'],
+                    datasets: selectedMonth === 'all' ? [{
+                        label: 'Income',
+                        data: displayMonths.map(month => monthlyData[month].income),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Expenses',
+                        data: displayMonths.map(month => monthlyData[month].expense),
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    }] : [{
+                        label: 'Amount (₹)',
+                        data: [
+                            monthlyData[selectedMonth].income,
+                            monthlyData[selectedMonth].expense,
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense
+                        ],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545', 
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense >= 0 ? '#17a2b8' : '#dc3545'
+                        ],
+                        borderColor: [
+                            '#1e7e34',
+                            '#c82333',
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense >= 0 ? '#138496' : '#c82333'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: chartTitle
+                        },
+                        legend: {
+                            display: selectedMonth === 'all'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTrendChart() {
+            const monthSelect = document.getElementById('monthSelect');
+            const selectedMonth = monthSelect ? monthSelect.value : 'all';
+            createTrendChart(selectedMonth || 'all');
+        }
 
         function loadSampleExpenseData() {
             const sampleData = `Date	Date M	Category	Type (Need/ Want)	Item	Amount (Rs.)
