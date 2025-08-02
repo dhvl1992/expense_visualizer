@@ -1,17 +1,4 @@
-// Create initial chart with all months
-            createTrendChart('all');
-        }
-
-        function createTrendChart(selectedMonth) {
-            if (charts.trend) {
-                charts.trend.destroy();
-            }
-
-            const monthlyData = window.globalMonthlyData;
-            const sortedMonths = window.globalSortedMonths;
-
-            let displayMonths = sortedMonths;
-            let chartTitle = 'Monthly <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -522,7 +509,7 @@ Date	Source	Amount (Rs.)
                     <h3 class="chart-title">📅 Monthly Financial Trend</h3>
                     <div style="margin-bottom: 15px;">
                         <label for="monthSelect" style="margin-right: 10px; font-weight: 600;">Select Month:</label>
-                        <select id="monthSelect" onchange="updateTrendChart()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ddd;">
+                        <select id="monthSelect" onchange="window.updateTrendChart()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ddd;">
                             <option value="all">All Months</option>
                         </select>
                     </div>
