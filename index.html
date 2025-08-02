@@ -1,0 +1,1064 @@
+// Create initial chart with all months
+            createTrendChart('all');
+        }
+
+        function createTrendChart(selectedMonth) {
+            if (charts.trend) {
+                charts.trend.destroy();
+            }
+
+            const monthlyData = window.globalMonthlyData;
+            const sortedMonths = window.globalSortedMonths;
+
+            let displayMonths = sortedMonths;
+            let chartTitle = 'Monthly <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Data Analyzer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        function createTrendChart(selectedMonth) {
+            if (charts.trend) {
+                charts.trend.destroy();
+            }
+
+            const monthlyData = window.globalMonthlyData;
+            const sortedMonths = window.globalSortedMonths;
+
+            let displayMonths = sortedMonths;
+            let chartTitle = 'Monthly Financial Trend';
+
+            if (selectedMonth !== 'all') {
+                displayMonths = [selectedMonth];
+                const monthName = new Date(selectedMonth + '-01').toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long' 
+                });
+                chartTitle = `Financial Data for ${monthName}`;
+            }
+
+            charts.trend = new Chart(document.getElementById('trendChart'), {
+                type: selectedMonth === 'all' ? 'line' : 'bar',
+                data: {
+                    labels: displayMonths.map(month => {
+                        if (selectedMonth === 'all') {
+                            return month;
+                        } else {
+                            return ['Income', 'Expenses', 'Net Savings'];
+                        }
+                    }).flat(),
+                    datasets: selectedMonth === 'all' ? [{
+                        label: 'Income',
+                        data: displayMonths.map(month => monthlyData[month].income),
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    }, {
+                        label: 'Expenses',
+                        data: displayMonths.map(month => monthlyData[month].expense),
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4
+                    }] : [{
+                        label: 'Amount (₹)',
+                        data: [
+                            monthlyData[selectedMonth].income,
+                            monthlyData[selectedMonth].expense,
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense
+                        ],
+                        backgroundColor: [
+                            '#28a745',
+                            '#dc3545', 
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense >= 0 ? '#17a2b8' : '#dc3545'
+                        ],
+                        borderColor: [
+                            '#1e7e34',
+                            '#c82333',
+                            monthlyData[selectedMonth].income - monthlyData[selectedMonth].expense >= 0 ? '#138496' : '#c82333'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: chartTitle
+                        },
+                        legend: {
+                            display: selectedMonth === 'all'
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateTrendChart() {
+            const selectedMonth = document.getElementById('monthSelect').value;
+            createTrendChart(selectedMonth);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .input-section h2 {
+            color: #555;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .expense-section h2 {
+            color: #dc3545;
+        }
+
+        .income-section h2 {
+            color: #28a745;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #e83e8c);
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .main-controls button {
+            padding: 15px 30px;
+            font-size: 18px;
+            margin: 0 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-card.income {
+            border-left: 4px solid #28a745;
+        }
+
+        .stat-card.expense {
+            border-left: 4px solid #dc3545;
+        }
+
+        .stat-card.savings {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-value.positive {
+            color: #28a745;
+        }
+
+        .stat-value.negative {
+            color: #dc3545;
+        }
+
+        .stat-value.neutral {
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        .chart-container.large {
+            grid-column: span 2;
+        }
+
+        .chart-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .json-output {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .json-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .json-tab {
+            padding: 10px 20px;
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px 8px 0 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .json-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .json-content {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            border: 1px solid #ddd;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 1px solid #c3e6cb;
+        }
+
+        canvas {
+            max-height: 400px;
+        }
+
+        @media (max-width: 1200px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container.large {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+
+            .main-controls button {
+                display: block;
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Financial Data Analyzer</h1>
+        
+        <div class="input-grid">
+            <div class="input-section expense-section">
+                <h2>📈 Expense Data</h2>
+                <textarea id="expenseInput" placeholder="Paste your expense data here...
+Example:
+Date	Date M	Category	Type (Need/ Want)	Item	Amount (Rs.)
+01/04/2025	04-2025	Public Transport	Need	Train Ticket	96.8"></textarea>
+                
+                <div class="button-group">
+                    <button class="btn-danger" onclick="loadSampleExpenseData()">📋 Load Sample</button>
+                    <button class="btn-secondary" onclick="clearExpenseData()">🗑️ Clear</button>
+                </div>
+            </div>
+
+            <div class="input-section income-section">
+                <h2>💵 Income Data</h2>
+                <textarea id="incomeInput" placeholder="Paste your income data here...
+Example:
+Date	Source	Amount (Rs.)
+03/04/2025	Salary	Rs87,869.00
+03/05/2025	DA difference	Rs2,354.00"></textarea>
+                
+                <div class="button-group">
+                    <button class="btn-success" onclick="loadSampleIncomeData()">📋 Load Sample</button>
+                    <button class="btn-secondary" onclick="clearIncomeData()">🗑️ Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-controls">
+            <button class="btn-primary" onclick="processData()">🚀 Analyze Financial Data</button>
+            <button class="btn-secondary" onclick="clearAllData()">🗑️ Clear Everything</button>
+        </div>
+
+        <div id="results" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card income">
+                    <div class="stat-value positive" id="totalIncome">₹0</div>
+                    <div class="stat-label">Total Income</div>
+                </div>
+                <div class="stat-card expense">
+                    <div class="stat-value negative" id="totalExpense">₹0</div>
+                    <div class="stat-label">Total Expenses</div>
+                </div>
+                <div class="stat-card savings">
+                    <div class="stat-value neutral" id="netSavings">₹0</div>
+                    <div class="stat-label">Net Savings</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value neutral" id="savingsRate">0%</div>
+                    <div class="stat-label">Savings Rate</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value neutral" id="expenseEntries">0</div>
+                    <div class="stat-label">Expense Entries</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value neutral" id="incomeEntries">0</div>
+                    <div class="stat-label">Income Entries</div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-container large">
+                    <h3 class="chart-title">💰 Income vs Expenses Overview</h3>
+                    <canvas id="overviewChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">📊 Income Sources</h3>
+                    <canvas id="incomeChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">💳 Expense Categories</h3>
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">🎯 Need vs Want vs Savings</h3>
+                    <canvas id="typeChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">📅 Monthly Financial Trend</h3>
+                    <div style="margin-bottom: 15px;">
+                        <label for="monthSelect" style="margin-right: 10px; font-weight: 600;">Select Month:</label>
+                        <select id="monthSelect" onchange="updateTrendChart()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ddd;">
+                            <option value="all">All Months</option>
+                        </select>
+                    </div>
+                    <canvas id="trendChart"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3 class="chart-title">📊 Top Expense Items</h3>
+                    <canvas id="itemChart"></canvas>
+                </div>
+            </div>
+
+            <div class="json-output">
+                <h2>🔧 JSON Data Output</h2>
+                <div class="json-tabs">
+                    <div class="json-tab active" onclick="showJsonTab('expense')">Expense Data</div>
+                    <div class="json-tab" onclick="showJsonTab('income')">Income Data</div>
+                    <div class="json-tab" onclick="showJsonTab('summary')">Summary</div>
+                </div>
+                <div class="json-content" id="jsonOutput"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let charts = {};
+        let expenseData = [];
+        let incomeData = [];
+        let currentJsonTab = 'expense';
+
+        function loadSampleExpenseData() {
+            const sampleData = `Date	Date M	Category	Type (Need/ Want)	Item	Amount (Rs.)
+01/04/2025	04-2025	Public Transport	Need	Train Ticket	96.8
+01/04/2025	04-2025	Recurring Deposit (RD)	Savings	for PPF	13000
+01/04/2025	04-2025	Recurring Deposit (RD)	Savings	for Personal Goals	6000
+01/04/2025	04-2025	Mutual Funds / SIP	Savings	SIP	11000
+01/04/2025	04-2025	Public Transport	Need	Train Ticket	96.8
+02/04/2025	04-2025	Dining Out	Want	Kayumbhai Tea	150
+03/04/2025	04-2025	Groceries	Need	Weekly Shopping	2500
+04/04/2025	04-2025	Entertainment	Want	Movie Ticket	350
+05/04/2025	04-2025	Utilities	Need	Electricity Bill	1200`;
+            
+            document.getElementById('expenseInput').value = sampleData;
+            showMessage('Sample expense data loaded!', 'success');
+        }
+
+        function loadSampleIncomeData() {
+            const sampleData = `Date	Source	Amount (Rs.)
+03/04/2025	Salary	Rs87,869.00
+03/05/2025	Salary	Rs83,907.00
+03/05/2025	DA difference	Rs2,354.00
+03/05/2025	Deposit	Rs161,833.00
+19/05/2025	Deposit	Rs74,692.00
+03/06/2025	Salary	Rs83,907.00
+03/07/2025	Salary	Rs83,907.00
+03/07/2025	Practical Exam	Rs7,662.00
+03/07/2025	Practical Exam	Rs350.00`;
+            
+            document.getElementById('incomeInput').value = sampleData;
+            showMessage('Sample income data loaded!', 'success');
+        }
+
+        function clearExpenseData() {
+            document.getElementById('expenseInput').value = '';
+        }
+
+        function clearIncomeData() {
+            document.getElementById('incomeInput').value = '';
+        }
+
+        function clearAllData() {
+            clearExpenseData();
+            clearIncomeData();
+            document.getElementById('results').classList.add('hidden');
+            clearCharts();
+            clearMessages();
+        }
+
+        function clearMessages() {
+            const messages = document.querySelectorAll('.error, .success');
+            messages.forEach(msg => msg.remove());
+        }
+
+        function showMessage(text, type) {
+            clearMessages();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = text;
+            document.querySelector('.main-controls').appendChild(messageDiv);
+        }
+
+        function parseAmount(amountStr) {
+            if (!amountStr) return 0;
+            // Remove Rs, commas, and extra spaces, then parse as float
+            return parseFloat(amountStr.replace(/Rs|,|\s/g, '')) || 0;
+        }
+
+        function parseExpenseCSV(data) {
+            const lines = data.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].split('\t').map(h => h.trim());
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split('\t');
+                if (values.length !== headers.length) continue;
+
+                const row = {};
+                headers.forEach((header, index) => {
+                    let value = values[index] ? values[index].trim() : '';
+                    
+                    if (header.includes('Amount') && value) {
+                        value = parseAmount(value);
+                    }
+                    
+                    row[header] = value;
+                });
+                rows.push(row);
+            }
+
+            return rows;
+        }
+
+        function parseIncomeCSV(data) {
+            const lines = data.trim().split('\n');
+            if (lines.length < 2) return [];
+
+            const headers = lines[0].split('\t').map(h => h.trim());
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split('\t');
+                if (values.length !== headers.length) continue;
+
+                const row = {};
+                headers.forEach((header, index) => {
+                    let value = values[index] ? values[index].trim() : '';
+                    
+                    if (header.includes('Amount') && value) {
+                        value = parseAmount(value);
+                    }
+                    
+                    row[header] = value;
+                });
+                rows.push(row);
+            }
+
+            return rows;
+        }
+
+        function processData() {
+            clearMessages();
+            const expenseInput = document.getElementById('expenseInput').value.trim();
+            const incomeInput = document.getElementById('incomeInput').value.trim();
+            
+            if (!expenseInput && !incomeInput) {
+                showMessage('Please paste at least expense or income data!', 'error');
+                return;
+            }
+
+            try {
+                expenseData = expenseInput ? parseExpenseCSV(expenseInput) : [];
+                incomeData = incomeInput ? parseIncomeCSV(incomeInput) : [];
+                
+                if (expenseData.length === 0 && incomeData.length === 0) {
+                    showMessage('No valid data rows found!', 'error');
+                    return;
+                }
+
+                displayResults();
+                showMessage(`Successfully processed ${expenseData.length} expense entries and ${incomeData.length} income entries!`, 'success');
+                
+            } catch (error) {
+                showMessage(`Error processing data: ${error.message}`, 'error');
+                console.error('Processing error:', error);
+            }
+        }
+
+        function displayResults() {
+            document.getElementById('results').classList.remove('hidden');
+            
+            updateStats();
+            updateJsonOutput();
+            createCharts();
+        }
+
+        function updateStats() {
+            const expenseAmountField = expenseData.length > 0 ? Object.keys(expenseData[0]).find(key => key.includes('Amount')) : null;
+            const incomeAmountField = incomeData.length > 0 ? Object.keys(incomeData[0]).find(key => key.includes('Amount')) : null;
+            const typeField = expenseData.length > 0 ? Object.keys(expenseData[0]).find(key => key.includes('Type')) : null;
+            
+            // Filter out savings entries from expenses
+            const actualExpenses = expenseData.filter(item => {
+                const type = item[typeField] || '';
+                return !type.toLowerCase().includes('savings');
+            });
+            
+            const totalExpense = actualExpenses.reduce((sum, item) => sum + (item[expenseAmountField] || 0), 0);
+            const totalIncome = incomeData.reduce((sum, item) => sum + (item[incomeAmountField] || 0), 0);
+            const netSavings = totalIncome - totalExpense;
+            const savingsRate = totalIncome > 0 ? (netSavings / totalIncome * 100) : 0;
+            
+            document.getElementById('totalIncome').textContent = `₹${totalIncome.toLocaleString('en-IN')}`;
+            document.getElementById('totalExpense').textContent = `₹${totalExpense.toLocaleString('en-IN')}`;
+            document.getElementById('netSavings').textContent = `₹${netSavings.toLocaleString('en-IN')}`;
+            document.getElementById('savingsRate').textContent = `${savingsRate.toFixed(1)}%`;
+            document.getElementById('expenseEntries').textContent = expenseData.length;
+            document.getElementById('incomeEntries').textContent = incomeData.length;
+
+            // Update colors based on values
+            const netSavingsElement = document.getElementById('netSavings');
+            const savingsRateElement = document.getElementById('savingsRate');
+            
+            if (netSavings > 0) {
+                netSavingsElement.className = 'stat-value positive';
+                savingsRateElement.className = 'stat-value positive';
+            } else if (netSavings < 0) {
+                netSavingsElement.className = 'stat-value negative';
+                savingsRateElement.className = 'stat-value negative';
+            } else {
+                netSavingsElement.className = 'stat-value neutral';
+                savingsRateElement.className = 'stat-value neutral';
+            }
+        }
+
+        function showJsonTab(tab) {
+            currentJsonTab = tab;
+            document.querySelectorAll('.json-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            updateJsonOutput();
+        }
+
+        function updateJsonOutput() {
+            const outputElement = document.getElementById('jsonOutput');
+            
+            switch(currentJsonTab) {
+                case 'expense':
+                    outputElement.textContent = JSON.stringify(expenseData, null, 2);
+                    break;
+                case 'income':
+                    outputElement.textContent = JSON.stringify(incomeData, null, 2);
+                    break;
+                case 'summary':
+                    const summary = {
+                        totalIncome: incomeData.reduce((sum, item) => {
+                            const amountField = Object.keys(item).find(key => key.includes('Amount'));
+                            return sum + (item[amountField] || 0);
+                        }, 0),
+                        totalExpenses: expenseData.reduce((sum, item) => {
+                            const amountField = Object.keys(item).find(key => key.includes('Amount'));
+                            return sum + (item[amountField] || 0);
+                        }, 0),
+                        expenseCount: expenseData.length,
+                        incomeCount: incomeData.length
+                    };
+                    summary.netSavings = summary.totalIncome - summary.totalExpenses;
+                    summary.savingsRate = summary.totalIncome > 0 ? (summary.netSavings / summary.totalIncome * 100).toFixed(2) + '%' : '0%';
+                    
+                    outputElement.textContent = JSON.stringify(summary, null, 2);
+                    break;
+            }
+        }
+
+        function clearCharts() {
+            Object.values(charts).forEach(chart => {
+                if (chart) chart.destroy();
+            });
+            charts = {};
+        }
+
+        function createCharts() {
+            clearCharts();
+            
+            // Overview Chart
+            const expenseAmountField = expenseData.length > 0 ? Object.keys(expenseData[0]).find(key => key.includes('Amount')) : null;
+            const incomeAmountField = incomeData.length > 0 ? Object.keys(incomeData[0]).find(key => key.includes('Amount')) : null;
+            const typeField = expenseData.length > 0 ? Object.keys(expenseData[0]).find(key => key.includes('Type')) : null;
+            
+            // Filter out savings entries from expenses
+            const actualExpenses = expenseData.filter(item => {
+                const type = item[typeField] || '';
+                return !type.toLowerCase().includes('savings');
+            });
+            
+            const totalExpense = actualExpenses.reduce((sum, item) => sum + (item[expenseAmountField] || 0), 0);
+            const totalIncome = incomeData.reduce((sum, item) => sum + (item[incomeAmountField] || 0), 0);
+            
+            charts.overview = new Chart(document.getElementById('overviewChart'), {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expenses', 'Net Savings'],
+                    datasets: [{
+                        label: 'Amount (₹)',
+                        data: [totalIncome, totalExpense, totalIncome - totalExpense],
+                        backgroundColor: ['#28a745', '#dc3545', totalIncome - totalExpense >= 0 ? '#17a2b8' : '#dc3545'],
+                        borderColor: ['#1e7e34', '#c82333', totalIncome - totalExpense >= 0 ? '#138496' : '#c82333'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Income Sources Chart
+            if (incomeData.length > 0) {
+                const incomeBySource = {};
+                incomeData.forEach(item => {
+                    const source = item.Source || 'Unknown';
+                    const amount = item[incomeAmountField] || 0;
+                    incomeBySource[source] = (incomeBySource[source] || 0) + amount;
+                });
+
+                charts.income = new Chart(document.getElementById('incomeChart'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(incomeBySource),
+                        datasets: [{
+                            data: Object.values(incomeBySource),
+                            backgroundColor: [
+                                '#28a745', '#20c997', '#17a2b8', '#6f42c1',
+                                '#e83e8c', '#fd7e14', '#ffc107', '#6c757d'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Expense Category Chart (excluding savings)
+            if (actualExpenses.length > 0) {
+                const categoryData = {};
+                actualExpenses.forEach(item => {
+                    const category = item.Category || 'Unknown';
+                    const amount = item[expenseAmountField] || 0;
+                    categoryData[category] = (categoryData[category] || 0) + amount;
+                });
+
+                // Sort categories by amount for better visualization
+                const sortedCategories = Object.entries(categoryData)
+                    .sort(([,a], [,b]) => b - a);
+
+                charts.category = new Chart(document.getElementById('categoryChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: sortedCategories.map(([cat]) => cat.length > 15 ? cat.substring(0, 15) + '...' : cat),
+                        datasets: [{
+                            label: 'Amount (₹)',
+                            data: sortedCategories.map(([,amount]) => amount),
+                            backgroundColor: '#FF6384',
+                            borderColor: '#E91E63',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+
+                // Type Chart
+                const typeField = Object.keys(expenseData[0]).find(key => key.includes('Type'));
+                if (typeField) {
+                    const typeData = {};
+                    expenseData.forEach(item => {
+                        const type = item[typeField] || 'Unknown';
+                        const amount = item[expenseAmountField] || 0;
+                        typeData[type] = (typeData[type] || 0) + amount;
+                    });
+
+                    charts.type = new Chart(document.getElementById('typeChart'), {
+                        type: 'pie',
+                        data: {
+                            labels: Object.keys(typeData),
+                            datasets: [{
+                                data: Object.values(typeData),
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56'],
+                                borderWidth: 2,
+                                borderColor: '#fff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+
+                // Top Items Chart (excluding savings)
+                const itemData = {};
+                actualExpenses.forEach(item => {
+                    const itemName = item.Item || 'Unknown';
+                    const amount = item[expenseAmountField] || 0;
+                    itemData[itemName] = (itemData[itemName] || 0) + amount;
+                });
+
+                const topItems = Object.entries(itemData)
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 10);
+
+                charts.items = new Chart(document.getElementById('itemChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: topItems.map(([item]) => item.length > 15 ? item.substring(0, 15) + '...' : item),
+                        datasets: [{
+                            label: 'Amount (₹)',
+                            data: topItems.map(([,amount]) => amount),
+                            backgroundColor: '#4BC0C0',
+                            borderColor: '#36A2EB',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Monthly Trend Chart
+            const monthlyData = {};
+            
+            // Process income data
+            incomeData.forEach(item => {
+                const dateStr = item.Date;
+                if (!dateStr) return;
+                
+                try {
+                    const dateParts = dateStr.split('/');
+                    if (dateParts.length === 3) {
+                        const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // DD/MM/YYYY format
+                        if (!isNaN(date.getTime())) {
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            if (!monthlyData[monthKey]) {
+                                monthlyData[monthKey] = { income: 0, expense: 0, hasData: false };
+                            }
+                            const amount = item[incomeAmountField] || 0;
+                            if (!isNaN(amount) && amount > 0) {
+                                monthlyData[monthKey].income += amount;
+                                monthlyData[monthKey].hasData = true;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error parsing date:', dateStr);
+                }
+            });
+
+            // Process expense data (excluding savings)
+            actualExpenses.forEach(item => {
+                const dateStr = item.Date;
+                if (!dateStr) return;
+                
+                try {
+                    const dateParts = dateStr.split('/');
+                    if (dateParts.length === 3) {
+                        const date = new Date(dateParts[2], dateParts[1] - 1, dateParts[0]); // DD/MM/YYYY format
+                        if (!isNaN(date.getTime())) {
+                            const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                            if (!monthlyData[monthKey]) {
+                                monthlyData[monthKey] = { income: 0, expense: 0, hasData: false };
+                            }
+                            const amount = item[expenseAmountField] || 0;
+                            if (!isNaN(amount) && amount > 0) {
+                                monthlyData[monthKey].expense += amount;
+                                monthlyData[monthKey].hasData = true;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error parsing date:', dateStr);
+                }
+            });
+
+            // Filter out months with no actual data and sort
+            const sortedMonths = Object.keys(monthlyData)
+                .filter(month => monthlyData[month].hasData)
+                .sort();
+
+            // Populate month dropdown
+            const monthSelect = document.getElementById('monthSelect');
+            monthSelect.innerHTML = '<option value="all">All Months</option>';
+            sortedMonths.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = new Date(month + '-01').toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long' 
+                });
+                monthSelect.appendChild(option);
+            });
+
+            // Store data globally for month selection
+            window.globalMonthlyData = monthlyData;
+            window.globalSortedMonths = sortedMonths;
+            
+            // Create initial chart with all months
+            createTrendChart('all');
+        }
+    </script>
+</body>
+</html>
